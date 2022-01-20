@@ -144,31 +144,31 @@ const updateUI = function (acc){
 // 	console.log("The login button clicked!!");
 // })
 
-btnLoan.addEventListener('click',function(e){
-	e.preventDefault();
-	const amount = Number(inputLoanAmount.value);
-	console.log("loan button clicked");
-	if(amount>0 && currentAccount.movements.some(mov=>mov>= amount*0.1)){
-		currentAccount.movements.push(amount);
-		updateUI(currentAccount);
-		inputLoanAmount.value = "";
-	};
-})
+// btnLoan.addEventListener('click',function(e){
+// 	e.preventDefault();
+// 	const amount = Number(inputLoanAmount.value);
+// 	console.log("loan button clicked");
+// 	if(amount>0 && currentAccount.movements.some(mov=>mov>= amount*0.1)){
+// 		currentAccount.movements.push(amount);
+// 		updateUI(currentAccount);
+// 		inputLoanAmount.value = "";
+// 	};
+// })
 
-btnTransfer.addEventListener('click',function(e){
-	e.preventDefault();
-	const amount = Number(inputTransferAmount.value);
-	const receiverAcc = accounts.find((acc)=>inputTransferTo.value===acc.username);
-	console.log("Transfer button clicked");
-	if(amount>0 && receiverAcc && currentAccount.balance>=amount && receiverAcc?.username!==currentAccount.username){
-		console.log("transfer valid");
-		currentAccount.movements.push(-amount);
-		receiverAcc.movements.push(amount);
-		updateUI(currentAccount);
-		inputTransferAmount.value = "";
-		inputTransferTo.value = "";
-	}
-});
+// btnTransfer.addEventListener('click',function(e){
+// 	e.preventDefault();
+// 	const amount = Number(inputTransferAmount.value);
+// 	const receiverAcc = accounts.find((acc)=>inputTransferTo.value===acc.username);
+// 	console.log("Transfer button clicked");
+// 	if(amount>0 && receiverAcc && currentAccount.balance>=amount && receiverAcc?.username!==currentAccount.username){
+// 		console.log("transfer valid");
+// 		currentAccount.movements.push(-amount);
+// 		receiverAcc.movements.push(amount);
+// 		updateUI(currentAccount);
+// 		inputTransferAmount.value = "";
+// 		inputTransferTo.value = "";
+// 	}
+// });
 
 btnClose.addEventListener("click", function(e){
 	e.preventDefault();

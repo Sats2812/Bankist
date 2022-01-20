@@ -4,12 +4,39 @@ from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from .models import *
 from django.views.decorators.csrf import csrf_exempt
+import random
+from django.db.models import Q
+userloggedin=0
 # Create your views here.
 def index(request):
     return render(request,'index.html')
 
+def form(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        email = request.POST['email']
+        password = request.POST['password']
+        password2 = request.POST['password2']
+
+        if password==password2:
+            if new_user.objects.filter(email=email).exists():
+                messages.info(request,'Email already used')
+                return redirect('/')
+            elif new_user.objects.filter(username=username).exists():
+                messages.info(request, 'Username already used')
+                return redirect('/')
+            else:
+                new=new_user(username=username, email=email, password=password,password2=password2)
+                new.save();
+                return redirect('account')
+        else:
+            messages.info(request,'Passwords not the same')
+            return redirect('/')
+    else: 
+        return render(request,'notfound')
 
 def account(request):
+    global userloggedin
     print("this is req: ",request)
     if request.method == "POST":
         username = request.POST["username"]
@@ -18,9 +45,14 @@ def account(request):
             try:
                 user = new_user.objects.get(username=username,password=password)
                 if user.password == password:
-                    print("the user password: ",user.password)
+                    print('Fetching transactions')
+                    transactions=[]
+                    transactions+=Transaction.objects.filter(fromid=user.id)
+                    transactions+=Transaction.objects.filter(toid=user.id)
+                    print('Fetched transactions')
                     messages.info(request, '201')
-                    return redirect("account")
+                    userloggedin= user.id
+                    return render(request,"account.html",{'transactions':transactions})
                 else: 
                     messages.info(request, 'username or password is wrong.')
                     return redirect("account")
@@ -50,7 +82,7 @@ def form(request):
                 messages.info(request, 'Username already used')
                 return redirect('/')
             else:
-                new=new_user(username=username, email=email, password=password,password2=password2)
+                new=new_user(username=username, email=email, password=password)
                 new.save();
                 return redirect('account')
         else:
@@ -67,10 +99,48 @@ def contacts(request):
         message = request.POST['message']
         new_contact=contact(name=name,subject=subject,message=message,email=email)
         new_contact.save();
-        message.info(request,'Thank you for contacting us , We will reach out to you soon')
-        return redirect('contact')
+        messages.info(request,'Thank you for contacting us , We will reach out to you soon')
+        return redirect('contacts')
     else:
-        return render(request,'contact.html')
+        return render(request,'contacts.html')
 
+def getloan(request):
+    if request.method =='POST':
+        amount=request.POST['amount']
+        user=new_user.objects.get(id=userloggedin)
+        new_loan=Loan(amount=amount,uid=user)
+        new_loan.save()
+        user.balance+=int(amount)
+        user.save()
+        messages.info(request,'201')
+        return redirect('account')
 
-    
+def maketransaction(request):
+    global userloggedin
+    if request.method == 'POST':
+        touser=request.POST['touser']
+        fromid=new_user.objects.get(id=userloggedin)
+        toid=new_user.objects.get(username=touser)
+        amount=request.POST['amount']
+        transaction=Transaction(fromid=fromid, toid=toid, amount=amount)
+        transaction.save()
+        fromid.balance-=int(amount)
+        toid.balance+=int(amount)
+        fromid.save()
+        toid.save()
+        messages.info(request,'201')
+        return redirect('account')
+
+def getdebitcard(request):
+    global userloggedin
+    if request.method== 'POST':
+        user_id=new_user.objects.get(id=userloggedin)
+        card_no= ""
+        for i in range(16):
+            num=random.randint(1,9)
+            card_no+=str(num)
+        cvv=random.randint(100,999)
+        debit=Debitcard(userid=user_id,card_no=card_no,cvv=cvv)
+        debit.save()
+        user_id.debitcard_holder=True
+        user_id.save()
