@@ -18,9 +18,18 @@
   <body>
     <!-- TOP NAVIGATION -->
     <nav>
-      <p class="welcome">Log in to get started</p>
+        {% if user_data %}
+            <p class="welcome">Welcome, {{user_data.username}}</p>
+        {% else %}
+            <p class="welcome">Log in to get started</p>
+        {% endif %}
       <img src="{% static 'img/logo.png' %}" alt="Logo" class="logo" />
       <form class="login" action="account" method="POST">
+        {% for transaction in transactions %}
+        <p class="error_message">
+        {{transaction.amount}}
+        </p>
+        {% endfor %}
         {% csrf_token %}
         {% for message in messages %}
           {% if message|stringformat:"s" != "201" %}
@@ -62,47 +71,32 @@
       <div class="balance">
         <div>
           <p class="balance__label">Current balance</p>
-          <p class="balance__date">
-            As of <span class="date">05/03/2037</span>
-          </p>
         </div>
-        <p class="balance__value">0000€</p>
+        {% if user_data %}
+            <p class="balance__value">₹{{ user_data.balance }}</p>
+        {% endif %}
       </div>
 
       <!-- MOVEMENTS -->
       <div class="movements">
-        <div class="movements__row">
-          <div class="movements__type movements__type--deposit">2 deposit</div>
-          <div class="movements__date">3 days ago</div>
-          <div class="movements__value">4 000€</div>
-        </div>
-        <div class="movements__row">
-          <div class="movements__type movements__type--withdrawal">
-            1 withdrawal
-          </div>
-          <div class="movements__date">24/01/2037</div>
-          <div class="movements__value">-378€</div>
-        </div>
+
+        {% for transaction in transactions %}
+            <div class="movements__row">
+                <div class="movements__type movements__type--{{transaction.type}}">{{transaction.type}}</div>
+                <div class="movements__value">₹{{transaction.data.amount}}</div>
+            </div>
+        {% endfor %}
       </div>
 
-      <!-- SUMMARY -->
-      <div class="summary">
-        <p class="summary__label">In</p>
-        <p class="summary__value summary__value--in">0000€</p>
-        <p class="summary__label">Out</p>
-        <p class="summary__value summary__value--out">0000€</p>
-        <p class="summary__label">Interest</p>
-        <p class="summary__value summary__value--interest">0000€</p>
-        <button class="btn--sort">&downarrow; SORT</button>
-      </div>
 
       <!-- OPERATION: TRANSFERS -->
       <div class="operation operation--transfer">
         <h2>Transfer money</h2>
-        <form class="form form--transfer">
-          <input type="text" class="form__input form__input--to" />
-          <input type="number" class="form__input form__input--amount" />
-          <button class="form__btn form__btn--transfer">&rarr;</button>
+        <form class="form form--transfer" method="POST" action="maketransaction">
+          {% csrf_token %}
+          <input type="text" class="form__input form__input--to" name="touser" />
+          <input type="number" class="form__input form__input--amount" name="amount" />
+          <button class="form__btn form__btn--transfer" type="submit">&rarr;</button>
           <label class="form__label">Transfer to</label>
           <label class="form__label">Amount</label>
         </form>
@@ -111,27 +105,31 @@
       <!-- OPERATION: LOAN -->
       <div class="operation operation--loan">
         <h2>Request loan</h2>
-        <form class="form form--loan">
-          <input type="number" class="form__input form__input--loan-amount" />
-          <button class="form__btn form__btn--loan">&rarr;</button>
+        <form class="form form--loan" method="POST" action="getloan" >
+          {% csrf_token %}
+          <input type="number" class="form__input form__input--loan-amount" name="amount"/>
+          <button class="form__btn form__btn--loan" type="submit">&rarr;</button>
           <label class="form__label form__label--loan">Amount</label>
         </form>
       </div>
 
       <!-- OPERATION: CLOSE -->
       <div class="operation operation--close">
-        <h2>Close account</h2>
-        <form class="form form--close">
-          <input type="text" class="form__input form__input--user" />
-          <input
-            type="password"
-            maxlength="6"
-            class="form__input form__input--pin"
-          />
-          <button class="form__btn form__btn--close">&rarr;</button>
-          <label class="form__label">Confirm user</label>
-          <label class="form__label">Confirm PIN</label>
-        </form>
+        <h2>Debit card</h2>
+        {% if user_data.debitcard_holder %}
+            <form class="form form--close">
+            <div class="credit_card">
+                <label class="form__label"><b>Card No.: </b>{{debitcard.card_no}}</label>
+                <label class="form__label"><b>CVV: </b>{{debitcard.cvv}}</label>
+            </div>
+            </form>
+        {% else %}
+            <form class="form form--close" method="POST" action="getdebitcard">
+                {% csrf_token %}
+            <label class="form__label">Want a debit card?</label>
+            <button class="form__btn form__btn--close" type="submit">Yes &rarr;</button>
+            </form>
+        {% endif %}
       </div>
 
       <!-- LOGOUT TIMER -->
@@ -139,9 +137,6 @@
         You will be logged out in <span class="timer">05:00</span>
       </p>
     </main>
-
- 
-
     <script src="{% static 'script2.js' %}"></script>
     
   </body>
