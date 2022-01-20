@@ -51,7 +51,7 @@ def form(request):
                 return redirect('/')
             else:
                 new=new_user(username=username, email=email, password=password,password2=password2)
-                new.save();
+                new.save()
                 return redirect('account')
         else:
             messages.info(request,'Passwords not the same')
@@ -66,7 +66,7 @@ def contacts(request):
         subject = request.POST['subject']
         message = request.POST['message']
         new_contact=contact(name=name,subject=subject,message=message,email=email)
-        new_contact.save();
+        new_contact.save()
         message.info(request,'Thank you for contacting us , We will reach out to you soon')
         return redirect('contact')
     else:
