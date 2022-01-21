@@ -14,6 +14,6 @@ Then run,
 
             python manage.py runserver
 
-in the terminal you should see an address ex: http://localhost:19002/, visit this url on your browser
+in the terminal you should see an address ex: http://127.0.0.1:8000/, visit this url on your browser
 
 
