@@ -1,5 +1,5 @@
 # Bankist
-This is a application that allows users to reserve parking spots.
+This is a digital banking application created using Django framework.
 
 ## Instructions to Run
 After cloning the repo,
